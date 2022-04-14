@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huatec.dao.PostDao">
+    <!-- 自定义结果集 -->
+    <resultMap type="Post" id="PostResult">
+        <id property="id" column="post_id" />
+        <result property="title" column="title" />
+        <result property="content" column="content" />
+        <result property="date" column="create_date" />
+        <result property="editor" column="editor" />
+    </resultMap>
+
+    <!-- 根据条件查询公告 -->
+    <select id="findPosts" resultMap="PostResult">
+        select * from post_tb
+    </select>
+    <!-- 添加公告 -->
+    <insert id="addPost" parameterType="Post">
+        insert into post_tb(title,content,editor,create_date) values(#{title},#{content},#{editor},#{date})
+    </insert>
+<!--    <insert id="addPost" useGeneratedKeys="true" keyProperty="post_id">-->
+<!--        insert-->
+<!--        into post_tb(title,content,editor,create_date)-->
+<!--        values(#{title},#{content},#{editor},#{date})-->
+<!--    </insert>-->
+    <!-- 修改公告 -->
+    <update id="updatePost" parameterType="Post">
+        update post_tb set title=#{title},content=#{content},editor=#{editor},create_date=#{date}
+        where post_id=#{id}
+    </update>
+    <!-- 删除公告 -->
+    <delete id="deletePost" parameterType="Integer">
+        delete from post_tb
+        where
+            post_id=#{id}
+    </delete>
+    <!-- 根据 ID 查询公告信息 -->
+    <select id="getPostById" parameterType="Integer" resultMap="PostResult">
+        select p.editor,p.post_id,p.title,p.content,p.create_date
+        from post_tb p where p.post_id=#{id}
+    </select>
+
+
+</mapper>

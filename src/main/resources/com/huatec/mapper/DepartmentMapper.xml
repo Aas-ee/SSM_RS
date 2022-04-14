@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huatec.dao.DepartmentDao">
+    <!-- 自定义结果集 注意property属性值为实体类属性名，columns属性值为数据库表字段-->
+    <resultMap type="Department" id="DepartmentResult">
+        <id property="id" column="dept_id" />
+        <result property="name" column="dept_name" />
+        <result property="description" column="dept_description" />
+    </resultMap>
+    <!-- 根据条件查询部门 -->
+    <select id="findDepartments" parameterType="Map" resultMap="DepartmentResult">
+        select * from dept_tb
+        <where>
+            <if test="name!=null and name!='' ">
+                dept_name like #{name}
+            </if>
+        </where>
+    </select>
+    <!-- 根据条件查询部门数量 -->
+    <select id="getCount" parameterType="Map" resultType="Integer">
+        select count(*) from dept_tb
+        <where>
+            <if test="name!=null and name!='' ">
+                dept_name like #{name}
+            </if>
+        </where>
+    </select>
+    <!-- 添加部门 -->
+    <insert id="addDepartment" useGeneratedKeys="true" keyProperty="dept_id">
+        insert into dept_tb(dept_name,dept_description)
+        values(#{name},#{description})
+    </insert>
+    <!-- 修改部门 -->
+    <update id="updateDepartment" parameterType="Department">
+        update dept_tb set
+                           dept_name=#{name},dept_description=#{description} where dept_id=#{id}
+    </update>
+    <!-- 删除部门 -->
+    <delete id="deleteDepartment" parameterType="Integer">
+        delete from dept_tb where
+            dept_id=#{id}
+    </delete>
+</mapper>

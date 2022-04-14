@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huatec.dao.RecruitDao">
+    <!-- 自定义结果集 -->
+    <resultMap type="Recruit" id="RecruitResult">
+        <id property="id" column="recruit_id" />
+        <result property="title" column="title" />
+        <result property="content" column="content" />
+        <result property="date" column="create_date" />
+        <association property="admin" javaType="Admin">
+            <id property="id" column="admin_id" />
+            <result property="username" column="username" />
+        </association>
+    </resultMap>
+    <!-- 根据条件查询公告 -->
+    <select id="findRecruits" parameterType="Map" resultMap="RecruitResult">
+        select a.admin_id,a.username,p.recruit_id,p.title,p.content,p.create_date
+        from admin_tb a,recruit_tb p where p.admin_id = a.admin_id
+        <if test="title!=null and title!='' ">
+            and p.title like #{title}
+        </if>
+    </select>
+
+    <!-- 根据条件查询公告数量 -->
+    <select id="getCount" parameterType="Map" resultType="Integer">
+        select count(*) from recruit_tb
+        <where>
+            <if test="title!=null and title!='' ">
+                title like #{title}
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

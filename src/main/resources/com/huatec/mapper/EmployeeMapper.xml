@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huatec.dao.EmployeeDao">
+    <!-- 自定义结果集 注意property属性值为实体类属性名，columns属性值为数据库表字段-->
+    <resultMap type="Employee" id="EmployeeResult">
+        <id property="id" column="emp_id" />
+        <result property="name" column="emp_name" />
+        <result property="sex" column="sex" />
+        <result property="phone" column="phone" />
+        <result property="email" column="email" />
+        <result property="address" column="address" />
+        <result property="education" column="education" />
+        <result property="birthday" column="birthday" />
+        <!-- 关联映射：association -->
+        <association property="department" javaType="Department">
+            <id property="id" column="dept_id" />
+            <result property="name" column="dept_name" />
+        </association>
+        <association property="position" javaType="Position">
+            <id property="id" column="pos_id" />
+            <result property="name" column="pos_name" />
+        </association>
+        <association property="state" javaType="State">
+            <id property="id" column="state_id" />
+            <result property="name" column="state_name" />
+        </association>
+    </resultMap>
+    <!-- 根据条件查询员工 -->
+    <select id="findEmployees" parameterType="Map" resultMap="EmployeeResult">
+        select e.emp_id,e.emp_name,e.sex,e.phone,e.email,e.address,e.education,e.birthday,d.dept_id,d.dept_name,p.pos_id,p.pos_name,s.state_id,s.state_name
+        from employee_tb e,dept_tb d,position_tb p,state_tb s where e.dept_id = d.dept_id
+        and e.pos_id = p.pos_id and e.state_name = s.state_name
+        <if test="id!=null and id!='' ">
+            and e.emp_id = #{id}
+        </if>
+        <if test="name!=null and name!='' ">
+            and e.emp_name like #{name}
+        </if>
+        <if test="department_name!=null and department_name!='' ">
+            and d.dept_name like #{department_name}
+        </if>
+        <if test="position_name!=null and position_name!='' ">
+            and p.pos_name like #{position_name}
+        </if>
+        <if test="sex!=null and sex!='' ">
+            and e.sex  = #{sex}
+        </if>
+    </select>
+    <!-- 根据条件查询员工人数 -->
+    <select id="getCount" parameterType="Map" resultType="Integer">
+        select count(*) from employee_tb e,dept_tb d,position_tb p where
+        e.dept_id = d.dept_id
+        and e.pos_id = p.pos_id
+        <if test="id!=null and id!='' ">
+            and e.emp_id like #{id}
+        </if>
+        <if test="name!=null and name!='' ">
+            and e.emp_name like #{name}
+        </if>
+        <if test="sex!=null and sex!='' ">
+            and e.sex like #{sex}
+        </if>
+    </select>
+
+    <!-- 添加员工 -->
+    <insert id="addEmployee" parameterType="Employee">
+        insert
+        into employee_tb(emp_id,emp_name,sex,phone,email,address,education,birthday,dept_id,pos_id,state_name)
+        values(#{id},#{name},#{sex},#{phone},#{email},#{address},#{education},#{birthday},#{department.id},#{position.id},#{state.name})
+    </insert>
+    <!-- 修改员工 -->
+    <update id="updateEmployee" parameterType="Employee">
+        update employee_tb set
+                               emp_name=#{name},sex=#{sex},phone=#{phone},email=#{email},address=#{address},education=#{education},birthday=#{birthday},dept_id=#{department.id},pos_id=#{position.id},state_name=#{state.name}
+        where emp_id=#{id}
+    </update>
+    <!-- 删除员工 -->
+    <delete id="deleteEmployee" parameterType="String">
+        delete from employee_tb
+        where
+            emp_id=#{id}
+    </delete>
+
+    <select id="findEdu" parameterType="map" resultType="map">
+        select count(case when(education="高中")then 1 else null end) as g
+            ,count(case when(education="大学")then 1 else null end) as d
+             ,count(case when(education="研究生")then 1 else null end) as y
+             ,count(case when(education="博士")then 1 else null end) as b from employee_tb
+    </select>
+
+
+</mapper>

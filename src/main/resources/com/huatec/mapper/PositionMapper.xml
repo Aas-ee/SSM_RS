@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huatec.dao.PositionDao">
+    <!-- 自定义结果集 注意property属性值为实体类属性名，columns属性值为数据库表字段-->
+    <resultMap type="Position" id="PositionResult">
+        <id property="id" column="pos_id" />
+        <result property="name" column="pos_name" />
+        <result property="description" column="pos_description" />
+    </resultMap>
+    <!-- 根据条件查询职位 -->
+    <select id="findPositions" parameterType="Map" resultMap="PositionResult">
+        select * from position_tb
+        <where>
+            <if test="name!=null and name!='' ">
+                pos_name like #{name}
+            </if>
+        </where>
+    </select>
+    <!-- 根据条件查询职位数量 -->
+    <select id="getCount" parameterType="Map" resultType="Integer">
+        select count(*) from position_tb
+        <where>
+            <if test="name!=null and name!='' ">
+                pos_name like #{name}
+            </if>
+        </where>
+    </select>
+    <!-- 添加职位 -->
+    <insert id="addPosition" useGeneratedKeys="true" keyProperty="pos_id">
+        insert into position_tb(pos_name,pos_description)
+        values(#{name},#{description})
+    </insert>
+    <!-- 修改职位 -->
+    <update id="updatePosition" parameterType="Position">
+        update position_tb set
+        pos_name=#{name},pos_description=#{description} where pos_id=#{id}
+    </update>
+    <!-- 删除职位 -->
+    <delete id="deletePosition" parameterType="Integer">
+        delete from position_tb where
+            pos_id=#{id}
+    </delete>
+</mapper>

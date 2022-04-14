@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huatec.dao.AdminDao">
+    <!-- 自定义结果集 注意property属性值为实体类属性名，columns属性值为数据库表字段-->
+    <resultMap type="Admin" id="AdminResult">
+        <id property="id" column="admin_id" />
+        <result property="username" column="username" />
+        <result property="password" column="password" />
+        <result property="role_name" column="role_name" />
+    </resultMap>
+    <!-- 登录 -->
+    <select id="login" parameterType="Admin" resultMap="AdminResult">
+        select * from
+            admin_tb where username=#{username} and password=#{password} limit 1
+    </select>
+    <!-- 根据条件查询管理员 -->
+    <select id="findAdmins" parameterType="Map" resultMap="AdminResult">
+        select * from admin_tb
+        <where>
+            <if test="username!=null and username!='' ">
+                username like #{username}
+            </if>
+        </where>
+    </select>
+    <!-- 根据条件查询管理员的人数 -->
+    <select id="getCount" parameterType="Map" resultType="Integer">
+        select count(*) from admin_tb
+        <where>
+            <if test="username!=null and username!='' ">
+                username like #{username}
+            </if>
+        </where>
+    </select>
+    <!-- 添加管理员 -->
+    <insert id="addAdmin" useGeneratedKeys="true" keyProperty="admin_id">
+        insert into admin_tb(username,password)
+        values(#{username},#{password})
+    </insert>
+    <!-- 修改管理员 -->
+    <update id="updateAdmin" parameterType="Admin">
+        update admin_tb set
+                            username=#{username},password=#{password} where admin_id=#{id}
+    </update>
+    <!-- 删除管理员 -->
+    <delete id="deleteAdmin" parameterType="Integer">
+        delete from admin_tb where
+            admin_id=#{id}
+    </delete>
+</mapper>
