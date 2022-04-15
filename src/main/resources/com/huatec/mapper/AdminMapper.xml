@@ -11,8 +11,8 @@
     </resultMap>
     <!-- 登录 -->
     <select id="login" parameterType="Admin" resultMap="AdminResult">
-        select * from
-            admin_tb where username=#{username} and password=#{password} limit 1
+        select username,password from
+            admin_tb where username=#{username} limit 1
     </select>
     <!-- 根据条件查询管理员 -->
     <select id="findAdmins" parameterType="Map" resultMap="AdminResult">

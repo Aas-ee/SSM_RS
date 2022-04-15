@@ -27,97 +27,126 @@ public class AdminController {
     private AdminService adminService;
 
     @PostMapping("/login")
-    public String login(Admin admin, HttpServletRequest request, HttpSession session ) throws Exception {
+    public String login(Admin admin, HttpServletRequest request, HttpSession session, HttpServletResponse response)
+            throws Exception {
 
-        Admin resultAdmin =adminService.login(admin);
-       // 密码错误或者用户名错误
-        if(resultAdmin == null){
-            request.setAttribute("admin",admin);
-            request.setAttribute("errorMsg","please check your username or password");
-//            return "login";
-            return null;
-        }else {
-            //保存信息
-            session.setAttribute("currentAdmin",resultAdmin);
-//            System.out.println(resultAdmin.toString());
-            session.setAttribute("username",resultAdmin.getUsername());
-//            JSONObject result = new JSONObject();
-//            result.put("code",200);
-//            ResponseUtil.write(response ,result);
-            return null;
+        if (admin.getUsername() != null && admin.getPassword() != null) {
+            Admin login = adminService.login(admin);
+            if (login != null) {
+                if (admin.getPassword().equals(login.getPassword())) {
+//            if (){
+                    JSONObject result = new JSONObject();
+                    result.put("code", 200);
+                    ResponseUtil.write(response, result);
+                } else {
+                    String msg = "用户名或密码错误";
+                    JSONObject result = new JSONObject();
+                    result.put("success", false);
+                    result.put("msg", msg);
+                    ResponseUtil.write(response, result);
+                    return null;
+                }
+
+            }
         }
+        String msg = "用户名或密码错误";
+        JSONObject result = new JSONObject();
+        result.put("success", false);
+        result.put("msg", msg);
+        ResponseUtil.write(response, result);
+        return null;
     }
-//    //跳转至主页面请求
+
+//       // 密码错误或者用户名错误
+//        if(admin == null){
+//            request.setAttribute("admin",admin);
+//            request.setAttribute("errorMsg","please check your username or password");
+////            return "login";
+//            return null;
+//        }else {
+//            //保存信息
+//            session.setAttribute("currentAdmin",admin);
+////            System.out.println(resultAdmin.toString());
+//            session.setAttribute("username",admin.getUsername());
+////            JSONObject result = new JSONObject();
+////            result.put("code",200);
+////            ResponseUtil.write(response ,result);
+//            return null;
+//        }
+
+    //    //跳转至主页面请求
 //    @RequestMapping("/main")
 //    public String test(Model model) throws Exception{
 //        return "home_page";
-//    }
     @GetMapping("/list")
-    public String list(Admin admin ,HttpServletResponse response)throws Exception{
+    public String list(Admin admin, HttpServletResponse response) throws Exception {
 
-        Map<String,Object> map =new HashMap<String,Object>();
+        Map<String, Object> map = new HashMap<String, Object>();
         //判断查询条件是否为空，如果是，对条件做数据库模糊查询的处理
         if (admin.getUsername() != null
                 && !"".equals(admin.getUsername().trim())) {
             map.put("username", "%" + admin.getUsername() + "%");
         }
-        List<Admin> adminList= adminService.findAdmins(map);
+        List<Admin> adminList = adminService.findAdmins(map);
         Integer total = adminService.getCount(map);
 
         //JSON类型返回数据
         JSONObject result = new JSONObject();
-        JSONArray jsonArray =JSONArray.fromObject(adminList);
-        result.put("rows",jsonArray);
-        result.put("total",total);
-        ResponseUtil.write(response ,result);
+        JSONArray jsonArray = JSONArray.fromObject(adminList);
+        result.put("rows", jsonArray);
+        result.put("total", total);
+        ResponseUtil.write(response, result);
         return null;
     }
-    @PostMapping("/save")
-    public String save(Admin admin,HttpServletRequest request,HttpServletResponse response) throws Exception{
 
-        int resultTotal =0;
+    @PostMapping("/save")
+    public String save(Admin admin, HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+        int resultTotal = 0;
         String msg = "参数不合法";
-        if(admin.getId() ==null) {
+        if (admin.getId() == null) {
             resultTotal = adminService.addAdmin(admin);
-        }else {
+        } else {
             resultTotal = adminService.updateAdmin(admin);
         }
         JSONObject result = new JSONObject();
-        if(resultTotal > 0){
-            result.put("code",200);
-            result.put("success",true);
-        }else{
-            result.put("success",false);
-            result.put("msg",msg);
+        if (resultTotal > 0) {
+            result.put("code", 200);
+            result.put("success", true);
+        } else {
+            result.put("success", false);
+            result.put("msg", msg);
         }
-        ResponseUtil.write(response ,result);
+        ResponseUtil.write(response, result);
         return null;
     }
+
     @PostMapping("/delete")
-    public String delete(@RequestParam(value = "ids") String ids, HttpServletResponse response,HttpSession session) throws Exception{
+    public String delete(@RequestParam(value = "ids") String ids, HttpServletResponse response, HttpSession session) throws Exception {
 
         JSONObject result = new JSONObject();
-         //将要删除的管理员的id进行处理
-        String[] idsStr=ids.split(",");
-        for(int i=0; i< idsStr.length;i++){
+        //将要删除的管理员的id进行处理
+        String[] idsStr = ids.split(",");
+        for (int i = 0; i < idsStr.length; i++) {
             //不能删除超级管理员和当前登录的管理员
-            if(idsStr[i].equals("1") && idsStr[i].equals(((Admin)session.getAttribute("currentAdmin")).getId().toString())){
-                result.put("success" ,false);
+            if (idsStr[i].equals("1") && idsStr[i].equals(((Admin) session.getAttribute("currentAdmin")).getId().toString())) {
+                result.put("success", false);
                 continue;
-            }else {
+            } else {
                 adminService.deleteAdmin(Integer.parseInt(idsStr[i]));
-                result.put("success",true);
+                result.put("success", true);
             }
         }
-        ResponseUtil.write(response ,result);
+        ResponseUtil.write(response, result);
         return null;
 
-}
-   @GetMapping("/logout")
-    public String logout(HttpSession session) throws Exception{
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session) throws Exception {
         session.invalidate();
         return "abc";
 
-   }
+    }
 
 }
